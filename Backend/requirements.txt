@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-multipart
+pandas
+numpy
+beautifulsoup4
+requests
+lxml
+scikit-learn
+xgboost
+openai
+langchain
+SQLAlchemy
+python-jose[cryptography]
+passlib[bcrypt]

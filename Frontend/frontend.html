@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricVision Pro - Franchise Analytics Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script>
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        dark: '#0a0f1a', 
+                        card: '#111827', 
+                        cricinfo: '#03a9f4', 
+                        accent: '#38bdf8' 
+                    } 
+                } 
+            } 
+        }
+    </script>
+    <style>
+        body { background-color: #0a0f1a; color: white; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
+        .glass-card { background: linear-gradient(145deg, #111827, #1f2937); border: 1px solid rgba(255,255,255,0.05); }
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .bar-chart-row:hover .bar-fill { filter: brightness(1.25); }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- CUSTOM INLINE SVG ICON SYSTEM ---
+        function Icon({ name, className = "w-5 h-5" }) {
+            const icons = {
+                "bar-chart-2": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                ),
+                "users": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                ),
+                "shield": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                ),
+                "target": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                ),
+                "brain": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-3.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2z"></path>
+                        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-3.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2z"></path>
+                    </svg>
+                ),
+                "gavel": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <path d="M14 13l-9 9M22 6l-4-4M18 2l4 4-8 8-4-4 8-8zM10 14l4 4M2 22h6"></path>
+                    </svg>
+                ),
+                "x": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                ),
+                "message-square": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                ),
+                "send": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                ),
+                "bot": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                        <circle cx="12" cy="5" r="2"></circle>
+                        <path d="M12 7v4"></path>
+                        <line x1="8" y1="16" x2="8.01" y2="16"></line>
+                        <line x1="16" y1="16" x2="16.01" y2="16"></line>
+                    </svg>
+                ),
+                "activity": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                ),
+                "search": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                ),
+                "cpu": (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                        <rect x="9" y="9" width="6" height="6"></rect>
+                        <line x1="9" y1="1" x2="9" y2="4"></line>
+                        <line x1="15" y1="1" x2="15" y2="4"></line>
+                        <line x1="9" y1="20" x2="9" y2="23"></line>
+                        <line x1="15" y1="20" x2="15" y2="23"></line>
+                        <line x1="20" y1="9" x2="23" y2="9"></line>
+                        <line x1="20" y1="15" x2="23" y2="15"></line>
+                        <line x1="1" y1="9" x2="4" y2="9"></line>
+                        <line x1="1" y1="15" x2="4" y2="15"></line>
+                    </svg>
+                )
+            };
+            return icons[name] || null;
+        }
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('analytics');
+            const [players, setPlayers] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [isChatOpen, setIsChatOpen] = useState(false);
+
+            useEffect(() => {
+                fetch('http://127.0.0.1:8000/api/players/?limit=1000')
+                    .then(res => {
+                        if (!res.ok) throw new Error("Database offline");
+                        return res.json();
+                    })
+                    .then(data => { 
+                        setPlayers(data); 
+                        setLoading(false); 
+                    })
+                    .catch(err => {
+                        console.error("Backend offline, utilizing system fallback profiles.", err);
+                        setPlayers([]);
+                        setLoading(false);
+                    });
+            }, []);
+
+            return (
+                <div className="flex h-screen overflow-hidden relative">
+                    {/* Navigation Sidebar */}
+                    <nav className="w-20 md:w-64 bg-gray-900 border-r border-gray-800 flex flex-col items-center md:items-start py-8 transition-all z-10 shrink-0">
+                        <div className="mb-12 px-0 md:px-6 w-full flex justify-center md:justify-start">
+                            <div className="w-10 h-10 bg-cricinfo rounded-xl flex items-center justify-center shrink-0">
+                                <Icon name="activity" className="text-white w-6 h-6" />
+                            </div>
+                            <h1 className="text-xl font-black ml-3 hidden md:block tracking-wide">CricVision <span className="text-cricinfo">Pro</span></h1>
+                        </div>
+
+                        <div className="flex flex-col w-full gap-2 px-3 overflow-y-auto chat-scroll">
+                            <NavItem icon="bar-chart-2" label="Visual Analytics" active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
+                            <NavItem icon="users" label="Player Database" active={activeTab === 'database'} onClick={() => setActiveTab('database')} />
+                            <NavItem icon="shield" label="Franchise War Room" active={activeTab === 'warroom'} onClick={() => setActiveTab('warroom')} />
+                            <NavItem icon="gavel" label="Live Auction Sim" active={activeTab === 'auction'} onClick={() => setActiveTab('auction')} />
+                            <NavItem icon="target" label="Live Win Predictor" active={activeTab === 'predictor'} onClick={() => setActiveTab('predictor')} />
+                            <NavItem icon="brain" label="ML Testing Lab" active={activeTab === 'ml'} onClick={() => setActiveTab('ml')} />
+                        </div>
+                    </nav>
+
+                    {/* Main Content Area */}
+                    <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
+                        {loading ? (
+                            <div className="h-full flex flex-col items-center justify-center text-cricinfo animate-pulse">
+                                <Icon name="activity" className="w-12 h-12 mb-4 animate-spin" />
+                                <span className="text-lg font-semibold tracking-wide">Initializing CricVision Engine...</span>
+                            </div>
+                        ) : (
+                            <div className="pb-24">
+                                {activeTab === 'analytics' && <AnalyticsTab players={players} />}
+                                {activeTab === 'database' && <DatabaseTab players={players} />}
+                                {activeTab === 'warroom' && <WarRoomTab players={players} />}
+                                {activeTab === 'auction' && <AuctionSimulatorTab players={players} />}
+                                {activeTab === 'predictor' && <PredictorTab />}
+                                {activeTab === 'ml' && <MLTestingLab />}
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Chatbot Toggle Widget */}
+                    <div className="absolute bottom-6 right-6 z-50 flex flex-col items-end">
+                        {isChatOpen && <ChatWindow onClose={() => setIsChatOpen(false)} />}
+                        <button onClick={() => setIsChatOpen(!isChatOpen)} className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 ${isChatOpen ? 'bg-red-500 hover:bg-red-600 mt-4' : 'bg-cricinfo hover:bg-blue-500 hover:scale-110'}`}>
+                            {isChatOpen ? <Icon name="x" className="text-white w-6 h-6" /> : <Icon name="message-square" className="text-white w-6 h-6" />}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function NavItem({ icon, label, active, onClick }) {
+            return (
+                <button onClick={onClick} className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all w-full ${active ? 'bg-cricinfo/20 text-cricinfo' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}>
+                    <Icon name={icon} className="w-5 h-5 shrink-0" />
+                    <span className="font-semibold hidden md:block">{label}</span>
+                </button>
+            );
+        }
+
+        // --- TAB 1: VISUAL ANALYTICS CENTER ---
+        function AnalyticsTab({ players }) {
+            if (players.length === 0) {
+                return (
+                    <div className="text-center py-20 bg-gray-900/50 rounded-2xl border border-gray-800">
+                        <Icon name="activity" className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+                        <h3 className="text-xl font-bold">No Player Data Available</h3>
+                        <p className="text-gray-500 mt-2">Verify that the FastAPI database is hydrated and online.</p>
+                    </div>
+                );
+            }
+
+            const topPlayers = [...players].sort((a, b) => b.impact_score - a.impact_score).slice(0, 10);
+            
+            const roleCounts = players.reduce((acc, p) => {
+                const role = p.role.includes("Batter") ? "Batters" : (p.role.includes("Bowler") ? "Bowlers" : "Allrounders");
+                acc[role] = (acc[role] || 0) + 1;
+                return acc;
+            }, { "Batters": 0, "Bowlers": 0, "Allrounders": 0 });
+
+            const total = players.length || 1;
+            const batPct = (roleCounts["Batters"] / total) * 100;
+            const bowlPct = (roleCounts["Bowlers"] / total) * 100;
+            const allPct = (roleCounts["Allrounders"] / total) * 100;
+            
+            const donutStyle = {
+                background: `conic-gradient(
+                    #03a9f4 0% ${batPct}%, 
+                    #8b5cf6 ${batPct}% ${batPct + bowlPct}%, 
+                    #10b981 ${batPct + bowlPct}% 100%
+                )`
+            };
+
+            const highestImpactPlayer = topPlayers.length > 0 ? topPlayers[0].name : "N/A";
+            const avgImpact = (players.reduce((sum, p) => sum + p.impact_score, 0) / total).toFixed(1);
+
+            return (
+                <div className="animate-fade-in max-w-7xl mx-auto">
+                    <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                        <Icon name="bar-chart-2" className="text-cricinfo w-8 h-8" /> 
+                        Visual Analytics Center
+                    </h2>
+                    
+                    {/* Visual Analytics Key KPIs */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="glass-card p-6 rounded-2xl border border-gray-700/50">
+                            <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-1">Total Tracked Profiles</p>
+                            <h3 className="text-4xl font-black text-white">{players.length}</h3>
+                        </div>
+                        <div className="glass-card p-6 rounded-2xl border border-gray-700/50">
+                            <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-1">Highest Impact Score</p>
+                            <h3 className="text-4xl font-black text-accent">{topPlayers[0]?.impact_score || 0}</h3>
+                            <p className="text-sm text-gray-500 mt-1">{highestImpactPlayer}</p>
+                        </div>
+                        <div className="glass-card p-6 rounded-2xl border border-gray-700/50">
+                            <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-1">Database Avg Impact</p>
+                            <h3 className="text-4xl font-black text-purple-400">{avgImpact}</h3>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Bar Chart Matrix */}
+                        <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-gray-700/50">
+                            <h3 className="text-xl font-bold mb-6 text-gray-200">Top 10 Global Impact Leaders</h3>
+                            <div className="space-y-4">
+                                {topPlayers.map((p, i) => (
+                                    <div key={i} className="flex items-center gap-4 bar-chart-row">
+                                        <div className="w-36 text-right text-sm text-gray-400 font-medium truncate" title={p.name}>
+                                            {p.name}
+                                        </div>
+                                        <div className="flex-1 h-6 bg-gray-800 rounded-full overflow-hidden relative">
+                                            <div 
+                                                className="h-full bg-cricinfo rounded-full bar-fill transition-all duration-500 ease-out" 
+                                                style={{ width: `${p.impact_score}%` }}>
+                                            </div>
+                                        </div>
+                                        <div className="w-12 text-sm font-bold text-white text-right">{p.impact_score}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Pie Chart Matrix */}
+                        <div className="glass-card p-6 rounded-2xl border border-gray-700/50 flex flex-col items-center">
+                            <h3 className="text-xl font-bold mb-8 text-gray-200 w-full text-left">Role Distribution</h3>
+                            
+                            <div className="relative w-48 h-48 rounded-full flex items-center justify-center shadow-xl shadow-black/50" style={donutStyle}>
+                                <div className="w-32 h-32 bg-[#111827] rounded-full flex items-center justify-center border-4 border-[#111827]">
+                                    <span className="text-gray-400 text-sm font-bold uppercase">Roles</span>
+                                </div>
+                            </div>
+                            
+                            <div className="w-full mt-8 space-y-3">
+                                <div className="flex justify-between items-center text-sm">
+                                    <div className="flex items-center gap-2 text-gray-300">
+                                        <div className="w-3 h-3 rounded-full bg-[#03a9f4]"></div>
+                                        Batters
+                                    </div>
+                                    <span className="font-bold text-white">{roleCounts["Batters"]} ({batPct.toFixed(0)}%)</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <div className="flex items-center gap-2 text-gray-300">
+                                        <div className="w-3 h-3 rounded-full bg-[#8b5cf6]"></div>
+                                        Bowlers
+                                    </div>
+                                    <span className="font-bold text-white">{roleCounts["Bowlers"]} ({bowlPct.toFixed(0)}%)</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <div className="flex items-center gap-2 text-gray-300">
+                                        <div className="w-3 h-3 rounded-full bg-[#10b981]"></div>
+                                        Allrounders
+                                    </div>
+                                    <span className="font-bold text-white">{roleCounts["Allrounders"]} ({allPct.toFixed(0)}%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- TAB 2: PLAYER SCOUTING DATABASE ---
+        function DatabaseTab({ players }) {
+            const [search, setSearch] = useState("");
+            const [roleFilter, setRoleFilter] = useState("All");
+
+            const filtered = players.filter(p => {
+                const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.team.toLowerCase().includes(search.toLowerCase());
+                const matchesRole = roleFilter === "All" || p.role.includes(roleFilter);
+                return matchesSearch && matchesRole;
+            });
+            
+            return (
+                <div className="animate-fade-in">
+                    <header className="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <h2 className="text-3xl font-bold flex items-center gap-3">
+                            <Icon name="users" className="text-cricinfo w-8 h-8" />
+                            Scouting Database
+                        </h2>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="relative">
+                                <Icon name="search" className="w-5 h-5 absolute left-3 top-2.5 text-gray-500" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search player or franchise..." 
+                                    value={search} 
+                                    onChange={(e) => setSearch(e.target.value)} 
+                                    className="bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 pr-4 py-2 outline-none focus:border-cricinfo w-full" 
+                                />
+                            </div>
+                            <select 
+                                className="bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 outline-none focus:border-cricinfo"
+                                value={roleFilter}
+                                onChange={(e) => setRoleFilter(e.target.value)}
+                            >
+                                <option value="All">All Roles</option>
+                                <option value="Batter">Batters</option>
+                                <option value="Bowler">Bowlers</option>
+                                <option value="Allrounder">Allrounders</option>
+                            </select>
+                        </div>
+                    </header>
+                    
+                    {filtered.length === 0 ? (
+                        <div className="text-center py-20 bg-gray-900/40 rounded-2xl border border-gray-800">
+                            <p className="text-gray-500">No players match the filter query criteria.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filtered.slice(0, 48).map(player => (
+                                <div key={player.id} className="glass-card p-6 rounded-xl border border-gray-700 flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white truncate" title={player.name}>{player.name}</h3>
+                                        <p className="text-cricinfo text-sm font-semibold mt-1">{player.team} • {player.role}</p>
+                                        
+                                        <div className="grid grid-cols-2 gap-4 mt-4 bg-black/20 p-3 rounded-lg border border-gray-800/50">
+                                            <div>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Match Outings</p>
+                                                <p className="text-sm font-bold text-white">{player.matches}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Runs Scored</p>
+                                                <p className="text-sm font-bold text-white">{player.runs}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Average</p>
+                                                <p className="text-sm font-bold text-white">{player.batting_average}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Wickets</p>
+                                                <p className="text-sm font-bold text-white">{player.wickets}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm text-gray-400 mt-6 pt-4 border-t border-gray-800/50">
+                                        <span>Base Price: <strong className="text-white">{player.base_price_est}</strong></span>
+                                        <span>AI Impact: <strong className="text-accent">{player.impact_score}</strong></span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // --- TAB 3: FRANCHISE WAR ROOM ---
+        function WarRoomTab({ players }) {
+            const [selectedPlayerId, setSelectedPlayerId] = useState(players[0]?.id || "");
+            const [budget, setBudget] = useState(100);
+            const [result, setResult] = useState(null);
+            const [calculating, setCalculating] = useState(false);
+            const selectedPlayer = players.find(p => p.id == selectedPlayerId);
+
+            const runAuctionAI = async () => {
+                if (!selectedPlayer) return;
+                setCalculating(true);
+                try {
+                    const res = await fetch('http://127.0.0.1:8000/api/predict/auction', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ impact_score: selectedPlayer.impact_score, budget_cr: budget }) 
+                    });
+                    const data = await res.json();
+                    setResult(data);
+                } catch (err) {
+                    console.error(err);
+                }
+                setCalculating(false);
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto animate-fade-in">
+                    <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                        <Icon name="shield" className="text-cricinfo w-8 h-8" /> 
+                        Auction War Room
+                    </h2>
+                    <div className="glass-card p-8 rounded-2xl mb-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <label className="block text-gray-400 mb-2 font-semibold">Select Target Player</label>
+                                <select 
+                                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 outline-none focus:border-cricinfo" 
+                                    value={selectedPlayerId} 
+                                    onChange={(e) => {
+                                        setSelectedPlayerId(e.target.value);
+                                        setResult(null);
+                                    }}
+                                >
+                                    {players.map(p => <option key={p.id} value={p.id}>{p.name} ({p.role})</option>)}
+                                </select>
+                                {selectedPlayer && (
+                                    <div className="mt-6 bg-black/20 p-4 rounded-lg border border-gray-800">
+                                        <p className="text-sm text-gray-400">Current Base Price Bracket: <span className="text-white font-bold">{selectedPlayer.base_price_est}</span></p>
+                                        <p className="text-sm text-gray-400">Model Impact Evaluation: <span className="text-accent font-bold">{selectedPlayer.impact_score}/100</span></p>
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-gray-400 mb-2 font-semibold">Your Remaining Purse (₹ Cr)</label>
+                                <input 
+                                    type="number" 
+                                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 outline-none focus:border-cricinfo" 
+                                    value={budget} 
+                                    onChange={(e) => {
+                                        setBudget(Number(e.target.value));
+                                        setResult(null);
+                                    }} 
+                                />
+                                <button 
+                                    onClick={runAuctionAI} 
+                                    className="w-full bg-cricinfo hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg mt-6 transition-all shadow-lg"
+                                    disabled={calculating}
+                                >
+                                    {calculating ? "Processing Core Parameters..." : "Calculate Max Bid Limit"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {result && (
+                        <div className="glass-card bg-gradient-to-br from-gray-900 to-blue-900/20 p-8 rounded-2xl text-center border-cricinfo/30 border animate-fade-in">
+                            <h3 className="text-gray-400 font-semibold mb-2 uppercase tracking-widest text-sm">AI Recommended Max Bid</h3>
+                            <p className="text-5xl font-black text-white mb-2">₹{result.max_bid_cr} Cr</p>
+                            <p className="text-cricinfo text-lg font-medium">Strategy Assigned: {result.strategy}</p>
+                            <p className="text-sm text-gray-500 mt-4 max-w-lg mx-auto">
+                                Ensure budget preservation policies are active. Bidding beyond this limit is mathematically counter-productive to overall roster balance.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // --- NEW TAB: LIVE AUCTION SIMULATOR ---
+        function AuctionSimulatorTab({ players }) {
+            const [selectedPlayerId, setSelectedPlayerId] = useState(players[0]?.id || "");
+            const [auctionActive, setAuctionActive] = useState(false);
+            const [currentBid, setCurrentBid] = useState(0); // In Lakhs
+            const [highestBidder, setHighestBidder] = useState("");
+            const [log, setLog] = useState([]);
+            const [sold, setSold] = useState(false);
+            const logEndRef = useRef(null);
+
+            const selectedPlayer = players.find(p => p.id == selectedPlayerId);
+
+            // Franchise AI Profiles
+            const TEAMS = ["MI", "CSK", "RCB", "KKR", "SRH", "DC"];
+
+            // Helper to format currency
+            const formatCr = (lakhs) => {
+                if (lakhs >= 100) return `₹${(lakhs / 100).toFixed(2)} Cr`;
+                return `₹${lakhs} L`;
+            };
+
+            const startAuction = () => {
+                // Parse base price into Lakhs
+                let baseLakhs = 20;
+                if (selectedPlayer.base_price_est.includes("Cr")) {
+                    const match = selectedPlayer.base_price_est.match(/\d+/);
+                    if (match) baseLakhs = parseInt(match[0]) * 100;
+                } else if (selectedPlayer.base_price_est.includes("L")) {
+                    const match = selectedPlayer.base_price_est.match(/\d+/);
+                    if (match) baseLakhs = parseInt(match[0]);
+                }
+
+                setCurrentBid(baseLakhs);
+                setHighestBidder("Base Price");
+                setLog([{ msg: `Auction started for ${selectedPlayer.name} at ${formatCr(baseLakhs)}`, type: 'system' }]);
+                setSold(false);
+                setAuctionActive(true);
+            };
+
+            const placeUserBid = () => {
+                if (sold) return;
+                const nextBid = currentBid < 100 ? currentBid + 10 : (currentBid < 200 ? currentBid + 20 : currentBid + 50);
+                setCurrentBid(nextBid);
+                setHighestBidder("YOU");
+                setLog(prev => [...prev, { msg: `YOU bid ${formatCr(nextBid)}`, type: 'user' }]);
+            };
+
+            // AI Bidding Logic
+            useEffect(() => {
+                if (!auctionActive || sold || highestBidder !== "YOU") return;
+
+                // Max AI Valuation calculation based on Impact Score
+                const baseMultiplier = selectedPlayer.impact_score > 90 ? 25 : (selectedPlayer.impact_score > 75 ? 15 : 5);
+                const randomFactor = Math.random() * 5; // AI unpredictability
+                const maxAiValuationLakhs = (selectedPlayer.impact_score * baseMultiplier) + (randomFactor * 100);
+
+                const timer = setTimeout(() => {
+                    if (currentBid < maxAiValuationLakhs) {
+                        const randomTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
+                        const nextBid = currentBid < 100 ? currentBid + 10 : (currentBid < 200 ? currentBid + 20 : currentBid + 50);
+                        setCurrentBid(nextBid);
+                        setHighestBidder(randomTeam);
+                        setLog(prev => [...prev, { msg: `${randomTeam} bids ${formatCr(nextBid)}`, type: 'ai' }]);
+                    } else {
+                        // AI gives up
+                        setLog(prev => [...prev, { msg: `Going once... Going twice...`, type: 'system' }]);
+                        setTimeout(() => {
+                            setSold(true);
+                            setAuctionActive(false);
+                            setLog(prev => [...prev, { msg: `SOLD to YOU for ${formatCr(currentBid)}!`, type: 'sold' }]);
+                        }, 1500);
+                    }
+                }, 1000 + (Math.random() * 1500)); // Random delay for realism
+
+                return () => clearTimeout(timer);
+            }, [currentBid, highestBidder, auctionActive, sold, selectedPlayer]);
+
+            // Auto-scroll log
+            useEffect(() => {
+                logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, [log]);
+
+            const fold = () => {
+                setSold(true);
+                setAuctionActive(false);
+                setLog(prev => [...prev, { msg: `You folded. SOLD to ${highestBidder} for ${formatCr(currentBid)}!`, type: 'sold' }]);
+            };
+
+            return (
+                <div className="max-w-5xl mx-auto animate-fade-in">
+                    <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                        <Icon name="gavel" className="text-cricinfo w-8 h-8" /> 
+                        Live Mock Auction
+                    </h2>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Control Panel */}
+                        <div className="glass-card p-8 rounded-2xl flex flex-col h-full">
+                            <label className="block text-gray-400 mb-2 font-semibold">Select Player to Auction</label>
+                            <select 
+                                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 outline-none focus:border-cricinfo mb-6 disabled:opacity-50" 
+                                value={selectedPlayerId} 
+                                onChange={(e) => { setSelectedPlayerId(e.target.value); setAuctionActive(false); setLog([]); setSold(false); }}
+                                disabled={auctionActive}
+                            >
+                                {players.map(p => <option key={p.id} value={p.id}>{p.name} ({p.role}) - {p.impact_score} Impact</option>)}
+                            </select>
+
+                            {selectedPlayer && !auctionActive && !sold && (
+                                <button onClick={startAuction} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl mt-auto transition-all shadow-lg text-lg">
+                                    Start Auction 
+                                </button>
+                            )}
+
+                            {(auctionActive || sold) && (
+                                <div className="mt-auto space-y-4">
+                                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-inner">
+                                        <p className="text-sm text-gray-400 font-semibold mb-1 uppercase tracking-widest">Current Bid</p>
+                                        <p className="text-5xl font-black text-white mb-2">{formatCr(currentBid)}</p>
+                                        <p className={`text-sm font-bold ${highestBidder === 'YOU' ? 'text-green-400' : 'text-red-400'}`}>
+                                            Highest Bidder: {highestBidder}
+                                        </p>
+                                    </div>
+                                    
+                                    {!sold && (
+                                        <div className="flex gap-4">
+                                            <button 
+                                                onClick={placeUserBid} 
+                                                disabled={highestBidder === "YOU"}
+                                                className={`flex-1 font-bold py-4 rounded-xl transition-all shadow-lg text-lg ${highestBidder === 'YOU' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-cricinfo hover:bg-blue-500 text-white'}`}
+                                            >
+                                                Place Bid
+                                            </button>
+                                            <button 
+                                                onClick={fold} 
+                                                className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg text-lg"
+                                            >
+                                                Fold
+                                            </button>
+                                        </div>
+                                    )}
+                                    {sold && (
+                                        <button onClick={() => {setAuctionActive(false); setLog([]); setSold(false);}} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-all">
+                                            New Auction
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Live Auction Log */}
+                        <div className="glass-card p-6 rounded-2xl flex flex-col h-[500px]">
+                            <h3 className="text-xl font-bold mb-4 text-gray-200 border-b border-gray-800 pb-2">Live Bidding Log</h3>
+                            <div className="flex-1 overflow-y-auto chat-scroll space-y-3 bg-gray-950/30 rounded-xl p-4 border border-gray-800/50">
+                                {log.length === 0 ? (
+                                    <p className="text-gray-500 text-center mt-10">Select a player and click start to begin the simulation.</p>
+                                ) : (
+                                    log.map((entry, i) => (
+                                        <div key={i} className={`p-3 rounded-lg text-sm font-medium border
+                                            ${entry.type === 'system' ? 'bg-gray-800 text-gray-300 border-gray-700 text-center' : ''}
+                                            ${entry.type === 'user' ? 'bg-green-900/40 text-green-400 border-green-800' : ''}
+                                            ${entry.type === 'ai' ? 'bg-red-900/20 text-red-400 border-red-900/50' : ''}
+                                            ${entry.type === 'sold' ? 'bg-yellow-600 text-white border-yellow-500 text-center text-lg font-black uppercase shadow-lg shadow-yellow-600/20' : ''}
+                                        `}>
+                                            {entry.msg}
+                                        </div>
+                                    ))
+                                )}
+                                <div ref={logEndRef} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- TAB 4: LIVE WIN PREDICTOR ---
+        function PredictorTab() {
+            const [target, setTarget] = useState(185);
+            const [score, setScore] = useState(95);
+            const [overs, setOvers] = useState(12.3);
+            const [wickets, setWickets] = useState(3);
+            const [result, setResult] = useState(null);
+            const [predicting, setPredicting] = useState(false);
+
+            const runPrediction = async () => {
+                setPredicting(true);
+                try {
+                    const res = await fetch('http://127.0.0.1:8000/api/predict/win', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ target, score, overs, wickets }) 
+                    });
+                    const data = await res.json();
+                    setResult(data);
+                } catch (err) {
+                    console.error(err);
+                }
+                setPredicting(false);
+            };
+
+            return (
+                <div className="max-w-5xl mx-auto animate-fade-in">
+                    <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                        <Icon name="target" className="text-cricinfo w-8 h-8" /> 
+                        Live Win Predictor
+                    </h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="glass-card p-8 rounded-2xl">
+                            <h3 className="text-xl font-bold mb-6 border-b border-gray-700 pb-2">Match Situation Parameters</h3>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-gray-400 text-sm mb-1">Target Score Set</label>
+                                    <input type="number" className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 outline-none" value={target} onChange={(e)=>setTarget(Number(e.target.value))} />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-400 text-sm mb-1">Current Score</label>
+                                    <input type="number" className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 outline-none" value={score} onChange={(e)=>setScore(Number(e.target.value))} />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-400 text-sm mb-1">Overs Bowled</label>
+                                    <input type="number" step="0.1" className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 outline-none" value={overs} onChange={(e)=>setOvers(Number(e.target.value))} />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-400 text-sm mb-1">Wickets Lost</label>
+                                    <input type="number" className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 outline-none" value={wickets} onChange={(e)=>setWickets(Number(e.target.value))} />
+                                </div>
+                            </div>
+                            <button onClick={runPrediction} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg mt-8 transition-all">
+                                {predicting ? "Running Calculations..." : "Execute Win Predictor"}
+                            </button>
+                        </div>
+                        
+                        <div className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center min-h-[300px]">
+                            {result ? (
+                                <div className="text-center w-full animate-fade-in">
+                                    <p className="text-gray-400 uppercase tracking-widest text-xs font-bold mb-4">Win Probability Assessment</p>
+                                    <div className="relative w-48 h-48 mx-auto mb-6 rounded-full flex items-center justify-center" style={{background: `conic-gradient(#03a9f4 ${result.win_prob}%, #1f2937 0)`}}>
+                                        <div className="w-40 h-40 bg-gray-900 rounded-full flex items-center justify-center">
+                                            <span className="text-5xl font-black">{result.win_prob}%</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between w-full px-8 mt-4 pt-4 border-t border-gray-800/50 text-sm text-gray-400">
+                                        <span>Current Run Rate: <strong>{result.crr}</strong></span>
+                                        <span>Required Run Rate: <strong className="text-accent">{result.rrr}</strong></span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 text-center">Inject live match statistics above to trace win probabilities.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- TAB 5: TRUE MACHINE LEARNING LAB ---
+        function MLTestingLab() {
+            const [stats, setStats] = useState({ matches: 50, runs: 1200, batting_average: 35.5, strike_rate: 145.0, wickets: 0, bowling_economy: 0.0 });
+            const [prediction, setPrediction] = useState(null);
+            const [running, setRunning] = useState(false);
+
+            const runTrueML = async () => {
+                setRunning(true);
+                try {
+                    const res = await fetch('http://127.0.0.1:8000/api/predict/true_impact', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify(stats) 
+                    });
+                    const data = await res.json();
+                    setPrediction(data);
+                } catch (err) {
+                    console.error(err);
+                    setPrediction({ error: "Failed to connect to machine learning backend." });
+                }
+                setRunning(false);
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto animate-fade-in">
+                    <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                        <Icon name="brain" className="text-cricinfo w-8 h-8" /> 
+                        True ML Inference Lab
+                    </h2>
+                    <p className="text-gray-400 mb-8">This module bypasses general math templates, passing raw player metrics directly to your trained <b>RandomForest</b> (<code>impact_model.pkl</code>) ML model.</p>
+                    
+                    <div className="glass-card p-8 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                {Object.keys(stats).map(key => (
+                                    <div key={key}>
+                                        <label className="block text-gray-400 text-xs uppercase mb-1">{key.replace('_', ' ')}</label>
+                                        <input type="number" step="0.1" className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 outline-none" value={stats[key]} onChange={(e) => setStats({...stats, [key]: Number(e.target.value)})} />
+                                    </div>
+                                ))}
+                            </div>
+                            <button onClick={runTrueML} className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg transition-all flex justify-center gap-2">
+                                <Icon name="cpu" /> {running ? "Calculating Inference..." : "Run ML Model Inference"}
+                            </button>
+                        </div>
+                        <div className="flex flex-col items-center justify-center bg-gray-900 rounded-xl border border-gray-800 p-6 min-h-[220px]">
+                            {prediction ? (
+                                <div className="text-center animate-fade-in">
+                                    {prediction.error ? (
+                                        <p className="text-red-400 text-sm">{prediction.error}</p>
+                                    ) : (
+                                        <>
+                                            <p className="text-gray-400 mb-2">RandomForest Predicted Output</p>
+                                            <h3 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cricinfo mb-4">
+                                                {prediction.predicted_impact}
+                                            </h3>
+                                        </>
+                                    )}
+                                </div>
+                            ) : (
+                                <p className="text-gray-600 text-center">Awaiting statistical parameters...</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- FLOATING CONVERSATIONAL CHAT WINDOW ---
+        function ChatWindow({ onClose }) {
+            const [messages, setMessages] = useState([
+                { sender: 'bot', text: 'Hi! I am the CricVision SQL Engine. Ask me analytical queries about the database like "Who has the highest strike rate?" or "Who has the most wickets?"' }
+            ]);
+            const [input, setInput] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const messagesEndRef = useRef(null);
+
+            useEffect(() => { 
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
+            }, [messages, isTyping]);
+
+            const sendMessage = async (e) => {
+                e.preventDefault();
+                if (!input.trim()) return;
+                const userMsg = input;
+                setMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
+                setInput('');
+                setIsTyping(true);
+                try {
+                    const res = await fetch('http://127.0.0.1:8000/api/chat/', {
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ message: userMsg })
+                    });
+                    const data = await res.json();
+                    setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
+                } catch (err) {
+                    setMessages(prev => [...prev, { sender: 'bot', text: "Error connecting to query parser. Verify backend connectivity." }]);
+                }
+                setIsTyping(false);
+            };
+
+            return (
+                <div className="w-80 md:w-96 h-[500px] glass-card rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-700 animate-fade-in mb-4">
+                    <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700 flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-cricinfo rounded-full flex items-center justify-center">
+                                <Icon name="bot" className="w-4 h-4 text-white" />
+                            </div>
+                            <h3 className="font-bold text-white">AI Analytical Scout</h3>
+                        </div>
+                    </div>
+                    <div className="flex-1 p-4 overflow-y-auto chat-scroll flex flex-col gap-4 bg-gray-950/20">
+                        {messages.map((msg, i) => (
+                            <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.sender === 'user' ? 'bg-cricinfo text-white rounded-br-none' : 'bg-gray-800 text-gray-200 rounded-bl-none border border-gray-700'}`}>
+                                    {msg.text}
+                                </div>
+                            </div>
+                        ))}
+                        {isTyping && (
+                            <div className="flex justify-start">
+                                <div className="bg-gray-800 p-3 rounded-2xl rounded-bl-none border border-gray-700 flex gap-1">
+                                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                                </div>
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+                    <form onSubmit={sendMessage} className="p-3 border-t border-gray-700 bg-gray-900 flex gap-2">
+                        <input 
+                            type="text" 
+                            value={input} 
+                            onChange={(e) => setInput(e.target.value)} 
+                            placeholder="Ask an analytical query..." 
+                            className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-cricinfo" 
+                        />
+                        <button type="submit" className="bg-cricinfo hover:bg-blue-500 text-white p-2 rounded-lg transition-colors">
+                            <Icon name="send" className="w-4 h-4" />
+                        </button>
+                    </form>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
