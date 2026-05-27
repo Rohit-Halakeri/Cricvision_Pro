@@ -1,111 +1,226 @@
-🏏 CricVision Pro: AI-Powered Franchise Analytics Suite
+<div align="center">
 
-CricVision Pro is a full-stack, AI-driven sports analytics platform designed to simulate franchise management, real-time match predictions, and professional scouting. It integrates live ETL data pipelines, True Machine Learning (Random Forest) for player impact valuation, and a LangChain-powered NLP chatbot to interact with the statistical database.
+<img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+<img src="https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+<img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+<img src="https://img.shields.io/badge/scikit--learn-ML-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white" />
+<img src="https://img.shields.io/badge/LangChain-NLP-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white" />
+<img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" />
 
-✨ Core Features
+<br /><br />
 
-🧠 True Machine Learning Engine: Utilizes a custom-trained scikit-learn Random Forest Regressor to predict player impact scores based on raw historical metrics.
+# 🏏 CricVision Pro
 
-🤖 LangChain NLP Chatbot: A conversational SQL agent (powered by OpenAI & LangChain) that translates plain English queries into complex database queries (with a custom SQL fallback system).
+### AI-Powered Cricket Franchise Analytics Suite
 
-🏭 Automated ETL Data Pipelines: Built with Pandas and BeautifulSoup4 to extract live ICC rankings and massive historical Cricsheet ball-by-ball datasets directly into system memory.
+*Simulate. Scout. Dominate.*
 
-📊 Visual Analytics Dashboard: A zero-build, highly optimized React + Tailwind UI featuring live metric charts, dynamic stat generation, and conic-gradient data visualizers.
+A full-stack sports intelligence platform integrating **Random Forest ML**, **LangChain NLP**, and **live ETL pipelines** — built for the modern franchise manager.
 
-⚖️ Live Auction Simulator: A franchise war room that pits the user against AI-driven rival franchises in a mock bidding war, constrained by AI-calculated max-bid limits.
+[Getting Started](#-quick-start) · [Features](#-features) · [Architecture](#-project-architecture) · [Roadmap](#-roadmap)
 
-📈 Real-Time Win Predictor: Algorithmic calculation of live win probabilities utilizing run-rate pressure and wicket-penalty heuristics.
+</div>
 
-🛠️ Tech Stack
+---
 
-Backend & Data Engineering:
+## 🎯 What is CricVision Pro?
 
-Framework: FastAPI, Uvicorn
+CricVision Pro is a full-stack, AI-driven analytics platform that brings the power of a professional cricket franchise war room to your desktop. It combines real machine learning (not just heuristics), a conversational AI analyst, live data pipelines, and an interactive auction simulator — all in a zero-build React frontend.
 
-Database: SQLite3, SQLAlchemy ORM
+Whether you're building your dream squad, predicting live match outcomes, or querying 10 years of ball-by-ball data in plain English, CricVision Pro has you covered.
 
-Data Pipeline (ETL): Pandas, BeautifulSoup4, Requests
+---
 
-Machine Learning: Scikit-Learn, Pickle
+## ✨ Features
 
-AI/NLP: LangChain, OpenAI GPT-3.5-turbo
+### 🧠 True Machine Learning Engine
+A custom-trained **scikit-learn Random Forest Regressor** predicts player impact scores using raw historical metrics. The model is trained on real Cricsheet data and persisted as a `.pkl` file — not mock scores or static lookup tables.
 
-Frontend:
+### 🤖 LangChain NLP Chatbot
+An intelligent **conversational SQL agent** (powered by OpenAI GPT-3.5-turbo + LangChain) that translates plain-English questions into precise database queries. Includes a custom SQL fallback system for robustness.
 
-Framework: React 18 (CDN/Standalone)
+> *"Who are the top 5 all-rounders by impact score in T20 matches since 2020?"* — just type it.
 
-Styling: Tailwind CSS
+### 🏭 Automated ETL Data Pipelines
+Live data hydration via **Pandas + BeautifulSoup4** — pulls ICC rankings and full ball-by-ball datasets from Cricsheet directly into the SQLite database. No manual CSV wrangling required.
 
-Icons: Custom Inline SVG Engine (Crash-proof)
+### 📊 Visual Analytics Dashboard
+A zero-build, highly optimised **React 18 + Tailwind CSS** frontend featuring:
+- Live metric charts and player stat cards
+- Conic-gradient data visualisers
+- Dynamic stat generation with a crash-proof inline SVG icon engine
 
-🚀 Installation & Setup
+### ⚖️ Live IPL-Style Auction Simulator
+A franchise **war room experience** where you bid against AI-driven rival franchises. Each AI opponent has a calculated max-bid limit, making every round competitive and unpredictable.
 
-Follow these steps to run CricVision Pro on your local machine.
+### 📈 Real-Time Win Predictor
+Algorithmic live win probability based on **run-rate pressure** and **wicket-penalty heuristics** — updated ball by ball.
 
-1. Clone the Repository
+---
 
-git clone [https://github.com/YOUR_USERNAME/cricvision-backend.git](https://github.com/YOUR_USERNAME/cricvision-backend.git)
-cd cricvision-backend
+## 🛠️ Tech Stack
 
+| Layer | Technology |
+|---|---|
+| **Backend Framework** | FastAPI, Uvicorn |
+| **Database** | SQLite3, SQLAlchemy ORM |
+| **ETL / Data Engineering** | Pandas, BeautifulSoup4, Requests |
+| **Machine Learning** | scikit-learn (Random Forest), Pickle |
+| **AI / NLP** | LangChain, OpenAI GPT-3.5-turbo |
+| **Frontend** | React 18 (CDN/Standalone) |
+| **Styling** | Tailwind CSS |
+| **Icons** | Custom Inline SVG Engine |
 
-2. Set Up a Virtual Environment (Recommended)
+---
 
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.10+
+- Node.js (optional, for local tooling)
+- An OpenAI API key
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Rohit-Halakeri/Cricvision_Pro.git
+cd Cricvision_Pro
+```
+
+### 2. Set Up a Virtual Environment
+
+```bash
 python -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
 
+# macOS / Linux
+source venv/bin/activate
 
-3. Install Dependencies
+# Windows
+venv\Scripts\activate
+```
 
-Make sure you have a requirements.txt file containing FastAPI, Uvicorn, Pandas, Scikit-Learn, Langchain, etc.
+### 3. Install Dependencies
 
+```bash
 pip install -r requirements.txt
+```
 
+### 4. Configure Environment Variables
 
-4. Hydrate the Database & Train the ML Model
+Create a `.env` file in the root directory:
 
-Run the data pipelines to build your database and train the AI brain:
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+```
 
-# 1. Run the live scraper to fetch real players
+> ⚠️ Never commit your `.env` file. It is already included in `.gitignore`.
+
+### 5. Hydrate the Database & Train the ML Model
+
+Run these **in order** — the scraper must complete before training:
+
+```bash
+# Step 1: Pull live player data into the database
 python -m app.scrapers.live_scraper
 
-# 2. Train the Random Forest ML Model based on current data
+# Step 2: Train the Random Forest model on current data
 python -m app.ml.train_model
+```
 
+### 6. Start the Backend Server
 
-5. Start the FastAPI Server
-
+```bash
 uvicorn app.main:app --reload
+```
 
+The API is now live at **`http://127.0.0.1:8000`**
 
-The API will now be running on http://127.0.0.1:8000 (Visit /docs for the Swagger UI).
+> 📖 Visit `/docs` for the interactive Swagger UI — all endpoints are documented and testable there.
 
-6. Launch the Frontend
+### 7. Launch the Frontend
 
-Simply double-click the frontend.html file in your repository to open it in Google Chrome, Edge, or Safari. The frontend connects to your local FastAPI instance automatically!
+Open `Frontend/frontend.html` directly in **Google Chrome**, **Edge**, or **Safari**. The frontend auto-connects to your local FastAPI instance — no build step needed.
 
-📂 Project Architecture
+---
 
-CricVision-Pro/
-├── app/
-│   ├── api/                  # FastAPI Routers (Chat, Predictions, Players)
-│   ├── core/                 # Database connection & configurations
-│   ├── ml/                   # Machine Learning scripts & .pkl model
-│   ├── models/               # SQLAlchemy ORM schemas
-│   ├── scrapers/             # ETL Pipelines (BeautifulSoup, Cricsheet Pandas)
-│   └── main.py               # FastAPI application entry point
-├── frontend.html             # Consolidated React + Tailwind Dashboard
-├── cricvision.db             # Local SQLite Database (Generated)
-├── requirements.txt          # Python dependencies
-├── .env                      # API Keys (Git Ignored)
-└── README.md                 # Project Documentation
+## 📂 Project Architecture
 
+```
+Cricvision_Pro/
+├── Backend/
+│   └── app/
+│       ├── api/            # FastAPI routers — Chat, Predictions, Players
+│       ├── core/           # DB connection, config, settings
+│       ├── ml/             # Random Forest training scripts & .pkl model
+│       ├── models/         # SQLAlchemy ORM schemas
+│       ├── scrapers/       # ETL pipelines (BeautifulSoup + Cricsheet/Pandas)
+│       └── main.py         # FastAPI application entry point
+│
+├── Frontend/
+│   └── frontend.html       # Consolidated React + Tailwind dashboard
+│
+├── cricvision.db           # SQLite database (auto-generated on first run)
+├── requirements.txt        # Python dependencies
+├── .env                    # API keys — git ignored
+├── .gitignore
+└── README.md
+```
 
-🔮 Future Roadmap (Phase 7)
+---
 
-AI Squad Optimizer (Auto-Draft): Implementation of a Knapsack-problem algorithm to automatically select the mathematically optimal 11-player squad under a strict salary cap constraint.
+## 🔌 API Reference
 
-Cloud Deployment: Hosting the backend on Render and frontend on Netlify.
+Once the server is running, the full interactive API docs are available at:
 
-📄 License
+| URL | Description |
+|---|---|
+| `http://127.0.0.1:8000/docs` | Swagger UI — interactive endpoint explorer |
+| `http://127.0.0.1:8000/redoc` | ReDoc — clean API reference |
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Key endpoint groups:
+
+- **`/api/players`** — Player search, stats, ML impact scores
+- **`/api/predictions`** — Match win probability, live score analysis
+- **`/api/chat`** — NLP chatbot interface (LangChain SQL agent)
+
+---
+
+## 🔮 Roadmap
+
+| Phase | Feature | Status |
+|---|---|---|
+| Phase 7 | **AI Squad Optimizer (Auto-Draft)** — Knapsack algorithm for optimal 11-player squad selection under salary cap | 🔜 Planned |
+| Phase 7 | **Cloud Deployment** — Backend on Render, Frontend on Netlify | 🔜 Planned |
+| Future | Advanced player comparison views | 💡 Idea |
+| Future | Historical auction analytics | 💡 Idea |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! To get started:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature/your-feature-name`
+5. Open a Pull Request
+
+Please ensure your code follows existing patterns and is tested before submitting.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+Built with ❤️ for the love of cricket and data engineering.
+
+**[⭐ Star this repo](https://github.com/Rohit-Halakeri/Cricvision_Pro)** if you found it useful!
+
+</div>

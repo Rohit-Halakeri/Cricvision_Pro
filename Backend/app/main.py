@@ -22,3 +22,5 @@ app.include_router(chat.router) # <-- CHATBOT ADDED
 @app.get("/")
 def read_root():
     return {"status": "online", "message": "CricVision Pro AI Backend is live!"}
+
+
