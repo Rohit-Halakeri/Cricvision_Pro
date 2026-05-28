@@ -196,6 +196,47 @@ Key endpoint groups:
 | Future | Historical auction analytics | 💡 Idea |
 
 ---
+# 🏏 CricVision Pro AI - Franchise Analytics Suite
+
+![Live Status](https://img.shields.io/badge/Status-Live-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![React](https://img.shields.io/badge/React-18-61dafb)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100-00a393)
+
+**Live Demo:** [cricvision-pro-rohit.netlify.app](https://cricvision-pro-rohit.netlify.app/)
+
+CricVision Pro is a full-stack, machine-learning-powered cricket analytics platform designed for franchise scouting and auction strategy. It features a custom Random Forest model to calculate a proprietary "Impact Score" for players based on historical data.
+
+### 🌟 Key Features
+* **AI Auto-Draft Optimizer:** Uses a mathematical knapsack-style heuristic to generate an optimal 11-player squad that maximizes team impact without exceeding a dynamic salary cap.
+* **Live Auction Simulator:** A real-time mock auction engine where users bid against automated AI franchises with calculated spending thresholds.
+* **True ML Inference Lab:** Directly query the backend Random Forest model to predict the impact score of hypothetical players.
+* **Visual Analytics Center:** Dynamic, real-time statistical breakdowns of the player database using React and Tailwind CSS.
+* **Win Probability Predictor:** A live match state analyzer to calculate win probabilities based on current run rates and targets.
+
+### 📸 Interface Previews
+
+**1. Visual Analytics Dashboard**
+> *(Add your `analytics.png` screenshot in the assets folder to show this!)*
+![Analytics Center](assets/analytics.png)
+
+**2. Scouting Database**
+> *(Add your `database.png` screenshot in the assets folder to show this!)*
+![Database](assets/database.png)
+
+**3. AI Auto-Draft Playing XI**
+> *(Add your `autodraft.png` screenshot in the assets folder to show this!)*
+![Auto Draft](assets/autodraft.png)
+
+### 🛠️ Tech Stack
+* **Frontend:** React.js, Tailwind CSS, Babel
+* **Backend:** Python, FastAPI, SQLAlchemy, Uvicorn
+* **Machine Learning:** Scikit-Learn (Random Forest Regressor), Pandas, NumPy
+* **Deployment:** Netlify (Frontend), Render (Backend API)
+
+---
+*Built from scratch by Rohit.*
+
 
 ## 🤝 Contributing
 
