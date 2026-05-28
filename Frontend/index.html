@@ -71,7 +71,7 @@
             const [isChatOpen, setIsChatOpen] = useState(false);
 
             useEffect(() => {
-                fetch('http://127.0.0.1:8000/api/players/?limit=1000')
+                fetch('https://cricvision-pro-1.onrender.com/api/players/?limit=1000')
                     .then(res => {
                         if (!res.ok) throw new Error("Database offline");
                         return res.json();
@@ -240,7 +240,7 @@
                 if (!selectedPlayer) return;
                 
                 try {
-                    const res = await fetch('http://127.0.0.1:8000/api/predict/auction', { 
+                    const res = await fetch('https://cricvision-pro-1.onrender.com/api/predict/auction', { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
                         body: JSON.stringify({ 
@@ -365,7 +365,7 @@
                 setError(null);
                 
                 try {
-                    const res = await fetch('http://127.0.0.1:8000/api/predict/auto-draft', { 
+                    const res = await fetch('https://cricvision-pro-1.onrender.com/api/predict/auto-draft', { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
                         body: JSON.stringify({ budget_cr: budget }) 
@@ -432,7 +432,7 @@
             
             const runPrediction = async () => { 
                 try {
-                    const res = await fetch('http://127.0.0.1:8000/api/predict/win', { 
+                    const res = await fetch('https://cricvision-pro-1.onrender.com/api/predict/win', { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
                         body: JSON.stringify({ target, score, overs, wickets }) 
@@ -474,7 +474,7 @@
             
             const runTrueML = async () => { 
                 try {
-                    const res = await fetch('http://127.0.0.1:8000/api/predict/true_impact', { 
+                    const res = await fetch('https://cricvision-pro-1.onrender.com/api/predict/true_impact', { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
                         body: JSON.stringify(stats) 
@@ -521,7 +521,7 @@
                 setIsTyping(true);
                 
                 try { 
-                    const res = await fetch('http://127.0.0.1:8000/api/chat/', { 
+                    const res = await fetch('https://cricvision-pro-1.onrender.com/api/chat/', { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
                         body: JSON.stringify({ message: userMsg }) 
